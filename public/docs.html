@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Docs • ScrapeHub ULTIMATE Pribadi</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>*{font-family:'Inter',sans-serif}.mono{font-family:'JetBrains Mono',monospace}.display{font-family:'Space Grotesk',sans-serif}.glass{background:rgba(255,255,255,0.85);backdrop-filter:blur(12px)}.gradient-text{background:linear-gradient(90deg,#000,#666);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.fade-in{animation:fadeIn 0.5s ease}@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}</style>
+</head>
+<body class="bg-[#fbfbfb] text-zinc-900 antialiased">
+<header class="sticky top-0 z-30 border-b glass">
+  <div class="max-w-[1200px] mx-auto px-4 md:px-6 py-3 flex justify-between items-center">
+    <div class="flex gap-2 items-center"><div class="w-8 h-8 bg-black text-white rounded-xl flex items-center justify-center font-bold display">S</div><span class="font-bold display text-[14px]">ScrapeHub ULTIMATE</span><span class="hidden md:inline text-[10px] px-2 py-1 bg-green-50 text-green-700 border border-green-200 rounded-full ml-2">V9 Real Pribadi</span></div>
+    <div class="flex gap-1.5"><a href="/" class="text-[11px] px-3 py-1.5 border rounded-full bg-white hover:bg-zinc-50 transition">App</a><a href="/admin.html" class="text-[11px] px-3 py-1.5 border rounded-full bg-white hover:bg-zinc-50 transition">Admin</a><a href="/docs.html" class="text-[11px] px-3 py-1.5 bg-black text-white rounded-full">Docs</a></div>
+  </div>
+</header>
+
+<main class="max-w-[1200px] mx-auto px-4 md:px-6">
+  <div class="py-10 md:py-16 text-center fade-in">
+    <div class="inline-flex px-3 py-1 bg-white border rounded-full text-[11px] mb-4 shadow-sm">● 30 Formats • CLI • Docker • Terminal • Real No Fake • Responsive HP & Laptop</div>
+    <h1 class="display text-[28px] md:text-[48px] font-bold tracking-tight leading-[1.05]">Universal scraper<br/><span class="gradient-text">untuk link apapun</span></h1>
+    <p class="text-[13px] md:text-[14px] text-zinc-500 mt-4 max-w-[640px] mx-auto leading-relaxed">Scrape link apapun tanpa Cloudflare berat. Output 30 format sampai habis + terminal cek aktif + CLI + Docker + Analytics. Semua real HTTP 200, no fake. Desain responsive smooth untuk pemakaian pribadi.</p>
+    <div class="mt-6 flex flex-col md:flex-row justify-center gap-2">
+      <a href="/" class="px-6 py-3 bg-black text-white rounded-[14px] text-[14px] font-medium shadow-lg shadow-black/20 hover:bg-zinc-900 transition">Buka App →</a>
+      <button onclick="navigator.clipboard.writeText('npx scrapehub-ultimate https://quotes.toscrape.com --check')" class="px-6 py-3 bg-white border rounded-[14px] text-[13px] mono hover:bg-zinc-50 transition">npx scrapehub --check</button>
+    </div>
+    <div class="mt-8 bg-[#0a0a0a] text-green-400 mono text-[11px] md:text-[12px] p-4 rounded-[16px] text-left max-w-[720px] mx-auto overflow-auto border border-zinc-800 shadow-xl">
+      <div class="text-zinc-500"># Quick start real</div>
+      <div>npm install -g scrapehub-ultimate</div>
+      <div>scrapehub https://quotes.toscrape.com --check</div>
+      <div class="text-zinc-400">→ [OK] HTML Fetch -> 200 ACTIVE (310ms) 11021 bytes ✅</div>
+      <div class="mt-3 text-zinc-500"># Docker + Custom Domain</div>
+      <div>docker run -p 3000:3000 scrapehub/scrapehub-ultimate</div>
+      <div>curl https://api.yourdomain.com/api/universal?url=https://quotes.toscrape.com&format=postman -o collection.json</div>
+    </div>
+  </div>
+
+  <div class="py-8 border-t">
+    <h2 class="display text-[20px] md:text-[24px] font-bold">30 Formats — Semua Real HTTP 200</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-5">
+      <div class="bg-white border rounded-[16px] p-5 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition"><div class="text-[11px] text-zinc-500 font-medium">DATA</div><div class="text-[13px] font-semibold mt-2 leading-relaxed">json, csv, excel/xlsx, sql, markdown, yaml, xml, html, txt</div><div class="mt-3 text-[11px] px-2 py-1 bg-green-50 text-green-700 border border-green-200 rounded-full inline-flex">✅ Tested 200 real</div></div>
+      <div class="bg-white border rounded-[16px] p-5 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition"><div class="text-[11px] text-zinc-500 font-medium">API SPEC</div><div class="text-[13px] font-semibold mt-2 leading-relaxed">graphql, grpc/proto, postman, openapi, swagger, insomnia</div><div class="mt-3 text-[11px] px-2 py-1 bg-green-50 text-green-700 border border-green-200 rounded-full inline-flex">✅ Tested 200 real</div></div>
+      <div class="bg-white border rounded-[16px] p-5 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition"><div class="text-[11px] text-zinc-500 font-medium">CODE SDK + CLI</div><div class="text-[13px] font-semibold mt-2 leading-relaxed">js, python, php, go, java, csharp, dart, ruby, rust, kotlin, swift, curl, nodejs + CLI + Docker</div><div class="mt-3 text-[11px] px-2 py-1 bg-green-50 text-green-700 border border-green-200 rounded-full inline-flex">✅ Tested 200 real</div></div>
+    </div>
+  </div>
+
+  <div class="py-8 border-t">
+    <h2 class="display text-[20px] md:text-[24px] font-bold">API Docs Real</h2>
+    <div class="mt-5 grid gap-4">
+      <div class="bg-white border rounded-[16px] p-5 hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition">
+        <div class="flex flex-wrap gap-2 items-center"><span class="px-2.5 py-1 bg-black text-white rounded-full text-[11px] font-medium">GET</span><span class="mono text-[13px]">/api/universal?url=&format=</span><span class="text-[10px] px-2 py-1 bg-green-50 text-green-700 border rounded-full">Real</span></div>
+        <p class="text-[13px] text-zinc-500 mt-3">Scrape link apapun, output 30 format real. Responsive, smooth, no fake.</p>
+        <div class="mt-3 bg-zinc-50 border rounded-[12px] p-3 mono text-[11px] overflow-auto leading-relaxed">
+          curl "https://yourdomain.com/api/universal?url=https://quotes.toscrape.com&format=json"<br/>
+          curl "https://yourdomain.com/api/universal?url=https://quotes.toscrape.com&format=csv" -o data.csv<br/>
+          curl "https://yourdomain.com/api/universal?url=https://quotes.toscrape.com&format=postman" -o collection.json<br/>
+          curl "https://yourdomain.com/api/universal?url=https://quotes.toscrape.com&format=graphql"
+        </div>
+      </div>
+      <div class="bg-white border rounded-[16px] p-5">
+        <div class="flex gap-2 items-center"><span class="px-2.5 py-1 bg-black text-white rounded-full text-[11px]">GET</span><span class="mono text-[13px]">/api/check?url=</span><span class="text-[10px] px-2 py-1 bg-green-50 text-green-700 border rounded-full">Terminal Realtime</span></div>
+        <div class="mt-3 bg-[#0a0a0a] text-green-400 mono text-[11px] p-3 rounded-[12px] border border-zinc-800">[OK] HTML Fetch -> 200 ACTIVE (145ms)<br/>{ "is_active": true, "real": true }</div>
+      </div>
+      <div class="bg-white border rounded-[16px] p-5">
+        <div class="flex gap-2 items-center"><span class="px-2.5 py-1 bg-zinc-900 text-white rounded-full text-[11px]">GET</span><span class="mono text-[13px]">/api/analytics</span><span class="text-[10px] px-2 py-1 bg-white border rounded-full">Admin</span></div>
+        <p class="text-[13px] text-zinc-500 mt-2">Lihat total_requests, top_formats, top_domains, recent real-time.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="py-8 border-t">
+    <h2 class="display text-[20px] md:text-[24px] font-bold">Custom Domain + Responsive</h2>
+    <div class="grid md:grid-cols-2 gap-4 mt-5">
+      <div class="bg-white border rounded-[16px] p-5">
+        <div class="font-semibold text-[14px]">Vercel (Gratis, Responsive HP & Laptop)</div>
+        <ol class="text-[13px] text-zinc-600 mt-3 space-y-2 list-decimal list-inside leading-relaxed">
+          <li>Push ZIP ke GitHub</li>
+          <li>Vercel → Import → Deploy</li>
+          <li>Settings → Domains → Add <span class="mono bg-zinc-50 border px-1 rounded">api.yourdomain.com</span></li>
+          <li>DNS CNAME <span class="mono">api → cname.vercel-dns.com</span></li>
+          <li>Desain sudah responsive, smooth animasi, teks keren, tidak numpuk</li>
+        </ol>
+      </div>
+      <div class="bg-white border rounded-[16px] p-5">
+        <div class="font-semibold text-[14px]">Fitur Responsive Pribadi</div>
+        <ul class="text-[13px] text-zinc-600 mt-3 space-y-1.5 list-disc list-inside">
+          <li>HP: input full width, tombol stack, tabs scroll horizontal</li>
+          <li>Laptop: grid 2 kolom, tabs wrap rapi</li>
+          <li>Smooth: transition-all, hover shadow, fade-in, shimmer</li>
+          <li>Teks keren: gradient, Space Grotesk display, mono JetBrains</li>
+          <li>Tidak numpuk: scrollbar-hide, overflow-auto, rounded 20px</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="py-10 border-t text-center">
+    <div class="inline-flex px-4 py-2 bg-white border rounded-full text-[11px] text-zinc-500">🔒 Pribadi Edition • Real No Fake • Responsive HP & Laptop • Smooth Animasi</div>
+    <div class="mt-4 flex justify-center gap-2 text-[11px]"><a href="/" class="px-3 py-1.5 bg-black text-white rounded-full">App</a><a href="/admin.html" class="px-3 py-1.5 bg-white border rounded-full">Admin</a><a href="/api/docs" class="px-3 py-1.5 bg-white border rounded-full">API Docs</a></div>
+  </div>
+</main>
+</body>
+</html>

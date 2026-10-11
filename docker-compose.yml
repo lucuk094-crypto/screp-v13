@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  scrapehub:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+    volumes:
+      - ./public:/app/public
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/api/docs').then(r=>{if(!r.ok) throw 1})"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # Optional: Redis cache for production (uncomment if needed)
+  # redis:
+  #   image: redis:alpine
+  #   ports:
+  #     - "6379:6379"
+
+# Usage:
+# docker-compose up --build
+# docker-compose up -d
+# docker-compose logs -f
+# curl http://localhost:3000/api/universal?url=https://quotes.toscrape.com&format=json
+# curl http://localhost:3000/api/check?url=https://quotes.toscrape.com

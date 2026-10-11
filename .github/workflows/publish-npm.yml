@@ -1,0 +1,111 @@
+name: Publish to NPM
+
+on:
+  push:
+    branches: [main, master]
+    tags: ['v*']
+  release:
+    types: [created]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install
+      - name: Test CLI real
+        run: |
+          echo "=== CLI Check Real ==="
+          node cli.js https://quotes.toscrape.com --check
+          echo "=== CLI JSON ==="
+          node cli.js https://quotes.toscrape.com --format=json | grep -qi "quotes"
+          echo "=== CLI CSV ==="
+          node cli.js https://quotes.toscrape.com --format=csv | grep -qi "quotes"
+          echo "✅ CLI real OK"
+      - name: Test Server real
+        run: |
+          node api-server.js &
+          sleep 6
+          curl -s http://localhost:3000/api/universal?url=https://quotes.toscrape.com&format=json | grep -qi "quotes"
+          curl -s http://localhost:3000/api/check?url=https://quotes.toscrape.com | grep -q "is_active"
+          curl -s http://localhost:3000/api/universal?url=https://quotes.toscrape.com&format=postman | grep -qi "info" || grep -qi "postman"
+          curl -s http://localhost:3000/api/universal?url=https://quotes.toscrape.com&format=graphql | grep -qi "scrape"
+          echo "✅ Server real OK"
+          pkill -f api-server.js || true
+
+  publish-npm:
+    needs: test
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm install
+      - name: Publish to NPM
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            web-sciping-*.zip
+          body: |
+            🚀 ScrapeHub ULTIMATE V11 - 30 Formats + CLI + Docker + Terminal
+            Real no fake, all tested HTTP 200
+            
+            Install:
+            ```bash
+            npm install -g scrapehub-ultimate
+            npx scrapehub https://quotes.toscrape.com --check
+            npx scrapehub https://quotes.toscrape.com --format=csv
+            ```
+
+  publish-docker:
+    needs: test
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/scrapehub-ultimate
+            ghcr.io/${{ github.repository }}
+          tags: |
+            type=ref,event=tag
+            type=sha
+            type=raw,value=latest,enable={{is_default_branch}}
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

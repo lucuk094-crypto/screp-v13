@@ -1,0 +1,20 @@
+{
+  "name": "scrapehub-ultimate",
+  "version": "5.0.0",
+  "description": "Universal scraper all-links + 30 formats + terminal check + CLI + Docker - real no fake",
+  "main": "api-server.js",
+  "bin": {
+    "scrapehub": "./cli.js",
+    "scrape": "./cli.js"
+  },
+  "scripts": {
+    "start": "node api-server.js",
+    "dev": "node api-server.js",
+    "cli": "node cli.js"
+  },
+  "keywords": ["scraper", "universal", "csv", "excel", "graphql", "grpc", "postman", "openapi", "cli", "docker"],
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  }
+}

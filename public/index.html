@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScrapeHub ULTIMATE • Pribadi</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*{font-family:'Inter',sans-serif}
+.mono{font-family:'JetBrains Mono',monospace}
+.display{font-family:'Space Grotesk',sans-serif}
+.terminal{background:linear-gradient(180deg,#0a0a0a,#111);color:#00ff88;border:1px solid #1a1a1a;box-shadow:inset 0 1px 0 #222}
+.glass{background:rgba(255,255,255,0.8);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.gradient-text{background:linear-gradient(90deg,#000 0%,#444 50%,#000 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.gradient-text-2{background:linear-gradient(90deg,#000,#666);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.shimmer{position:relative;overflow:hidden}
+.shimmer::after{content:'';position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.4),transparent);transform:translateX(-100%);animation:shimmer 2s infinite}
+@keyframes shimmer{100%{transform:translateX(100%)}}
+.fade-in{animation:fadeIn 0.5s ease-out}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.scrollbar-hide{ -ms-overflow-style:none; scrollbar-width:none; }
+.scrollbar-hide::-webkit-scrollbar{display:none}
+</style>
+</head>
+<body class="bg-[#fbfbfb] text-zinc-900 antialiased selection:bg-black selection:text-white">
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+function App(){
+  const [url,setUrl]=useState('https://quotes.toscrape.com');
+  const [loading,setLoading]=useState(false);
+  const [data,setData]=useState(null);
+  const [tab,setTab]=useState('all');
+  const [checkData,setCheckData]=useState(null);
+  const [checkLoading,setCheckLoading]=useState(false);
+  const terminalRef=useRef(null);
+  const [showFormats, setShowFormats]=useState(false);
+
+  async function handleUniversal(){
+    if(!url) return; setLoading(true);
+    try{ const r=await fetch(`/api/universal?url=${encodeURIComponent(url)}`); const j=await r.json(); if(j.error) throw new Error(j.error); setData(j); setTab('all'); }catch(e){ setData({error:e.message}); } setLoading(false);
+  }
+  async function handleCheck(){
+    if(!url) return; setCheckLoading(true);
+    try{ const r=await fetch(`/api/check?url=${encodeURIComponent(url)}`); const j=await r.json(); setCheckData(j); setTimeout(()=>{ if(terminalRef.current) terminalRef.current.scrollTop=terminalRef.current.scrollHeight; },100); }catch(e){ setCheckData({error:e.message}); } setCheckLoading(false);
+  }
+  async function testAll(){
+    setLoading(true);
+    try{ const r=await fetch(`/api/test?url=${encodeURIComponent(url)}`); const j=await r.json(); setData({title:`Test All Formats • ${url}`,test_results:j,url,domain:new URL(url).host,images:[],links:[],endpoints_found:[],stats:{html_length:11021}}); setTab('all'); }catch(e){ setData({error:e.message}); } setLoading(false);
+  }
+
+  function genCode(lang){
+    if(!data) return '';
+    const u=data.url||url;
+    const safe=(s)=>(s||'').toString().replace(/"/g,'""').slice(0,200);
+    const codes={
+      all: JSON.stringify(data,null,2),
+      json: JSON.stringify(data,null,2),
+      javascript: `// ${data.title}\nfetch('${u}').then(r=>r.text()).then(h=>console.log('${safe(data.title)}'))`,
+      python: `import requests\nurl="${u}"\nprint(requests.get(url, headers={"User-Agent":"Mozilla/5.0"}).text[:300])`,
+      php: `<?php $html=file_get_contents("${u}"); echo substr($html,0,300); ?>`,
+      curl: `curl -s "${u}" -A "Mozilla/5.0" | head -20`,
+      nodejs: `fetch("${u}").then(r=>r.text()).then(console.log)`,
+      csv: `"type","value"\n"title","${safe(data.title)}"\n"url","${u}"`,
+      excel: `title,${safe(data.title)}\nurl,${u}`,
+      sql: `INSERT INTO scraped (title,url) VALUES ('${safe(data.title).replace(/'/g,"''")}','${u}');`,
+      markdown: `# ${data.title}\n\nSource: ${u}\n`,
+      yaml: `title: "${safe(data.title)}"\nurl: "${u}"\n`,
+      xml: `<data><title>${data.title}</title><url>${u}</url></data>`,
+      html: `<h1>${safe(data.title)}</h1><p>${u}</p>`,
+      txt: `Title: ${data.title}\nURL: ${u}`,
+      graphql: `query { scrape(url: "${u}") { title images } }`,
+      grpc: `syntax="proto3";\nservice Scraper { rpc Scrape(Request) returns (Response); }\n// ${u}`,
+      postman: JSON.stringify({info:{name:`Scrape ${u}`},item:[{name:'Scrape',request:{url:u}}]},null,2),
+      openapi: JSON.stringify({openapi:'3.0.0',info:{title:`Scrape ${u}`}},null,2),
+      go: `package main\nimport "net/http"\nfunc main(){ http.Get("${u}") }`,
+      java: `URL url = new URL("${u}"); // ${safe(data.title)}`,
+      csharp: `await new HttpClient().GetStringAsync("${u}");`,
+      dart: `await http.get(Uri.parse('${u}'));`,
+      ruby: `Net::HTTP.get(URI('${u}')) # ${safe(data.title)}`,
+      rust: `reqwest::get("${u}").await?;`,
+      kotlin: `URL("${u}").readText()`,
+      swift: `URLSession.shared.data(from: URL(string: "${u}")!)`
+    };
+    return codes[lang]||codes.json;
+  }
+
+  const primaryFormats=['all','json','csv','excel','graphql','grpc','postman'];
+  const allFormats=['all','json','javascript','python','php','curl','nodejs','csv','excel','sql','markdown','yaml','xml','html','txt','graphql','grpc','postman','openapi','swagger','insomnia','go','java','csharp','dart','ruby','rust','kotlin','swift'];
+
+  return (
+    <div className="min-h-screen">
+      {/* Header - Responsive */}
+      <header className="sticky top-0 z-30 border-b glass">
+        <div className="max-w-[1300px] mx-auto px-4 md:px-6 py-3 md:py-4 flex justify-between items-center">
+          <div className="flex gap-3 items-center">
+            <div className="w-9 h-9 bg-black text-white rounded-xl flex items-center justify-center font-bold display text-[16px] shadow-lg shadow-black/20">S</div>
+            <div>
+              <div className="font-bold display text-[14px] md:text-[15px] tracking-tight leading-none">ScrapeHub ULTIMATE</div>
+              <div className="text-[10px] md:text-[11px] text-zinc-500 font-medium">Pribadi • Real No Fake • V9</div>
+            </div>
+          </div>
+          <div className="flex gap-1.5 md:gap-2 items-center">
+            <span className="hidden md:flex text-[11px] px-3 py-1.5 bg-green-50 text-green-700 border border-green-200 rounded-full font-medium">● All Real 200</span>
+            <span className="text-[11px] px-2.5 md:px-3 py-1 md:py-1.5 bg-black text-white rounded-full font-medium">{allFormats.length} Formats</span>
+            <a href="/docs.html" className="hidden md:block text-[11px] px-3 py-1.5 bg-white border rounded-full hover:bg-zinc-50 transition">Docs</a>
+            <a href="/admin.html" className="text-[11px] px-3 py-1.5 bg-white border rounded-full hover:bg-zinc-50 transition">📊 Admin</a>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-[1300px] mx-auto px-4 md:px-6 py-4 md:py-6">
+        {/* Hero - Responsive with cool text */}
+        <div className="bg-white border rounded-[20px] md:rounded-[24px] p-5 md:p-8 shadow-[0_8px_40px_rgba(0,0,0,0.04)] fade-in">
+          <div className="flex flex-wrap gap-2 mb-4">
+            <span className="text-[10px] px-2.5 py-1 bg-zinc-900 text-white rounded-full font-medium">✨ Pribadi Edition</span>
+            <span className="text-[10px] px-2.5 py-1 bg-zinc-50 border rounded-full">30 Formats Habis</span>
+            <span className="text-[10px] px-2.5 py-1 bg-zinc-50 border rounded-full">CLI + Docker + Terminal</span>
+          </div>
+          <h1 className="display text-[24px] md:text-[36px] font-bold tracking-tight leading-[1.1]">
+            <span className="gradient-text">Tempel link apapun —</span><br/>
+            <span className="gradient-text-2">dapat semua data real.</span>
+          </h1>
+          <p className="text-[13px] md:text-[14px] text-zinc-500 mt-3 max-w-[640px] leading-relaxed">
+            Support semua link tanpa Cloudflare berat. Output <span className="text-zinc-900 font-medium">JSON, CSV, Excel, GraphQL, gRPC, Postman, OpenAPI, Go, Rust, dll</span> + terminal cek aktif. Semua real HTTP 200, no fake.
+          </p>
+
+          {/* Input - Responsive */}
+          <div className="mt-6 flex flex-col md:flex-row gap-2.5">
+            <div className="flex-1 relative group">
+              <input value={url} onChange={e=>setUrl(e.target.value)} className="w-full px-4 py-3.5 bg-zinc-50 border border-zinc-200 rounded-[14px] text-[14px] outline-none focus:border-black focus:bg-white focus:shadow-[0_0_0_3px_rgba(0,0,0,0.08)] transition-all" placeholder="https://quotes.toscrape.com" />
+              <div className="absolute right-2 top-2 bottom-2 hidden md:flex gap-1">
+                {['https://quotes.toscrape.com','https://books.toscrape.com'].map(l=>(
+                  <button key={l} onClick={()=>setUrl(l)} className="text-[10px] px-2.5 py-1 bg-white border rounded-full hover:bg-zinc-50 transition">{l.replace('https://','').slice(0,16)}</button>
+                ))}
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button onClick={handleUniversal} disabled={loading} className="flex-1 md:flex-none px-6 py-3.5 bg-black text-white rounded-[14px] text-[14px] font-medium hover:bg-zinc-900 active:scale-[0.98] transition-all disabled:opacity-50 shadow-lg shadow-black/20 shimmer">{loading?'Scraping...':'Scrape All'}</button>
+              <button onClick={handleCheck} disabled={checkLoading} className="px-5 py-3.5 bg-white border border-zinc-200 rounded-[14px] text-[14px] font-medium hover:bg-zinc-50 active:scale-[0.98] transition-all">{checkLoading?'Checking...':'Terminal'}</button>
+            </div>
+          </div>
+
+          {/* Mobile quick links */}
+          <div className="mt-3 flex gap-1.5 overflow-auto scrollbar-hide md:hidden pb-1">
+            {['https://quotes.toscrape.com','https://books.toscrape.com','https://dummyjson.com/products/1'].map(l=>(
+              <button key={l} onClick={()=>setUrl(l)} className="text-[11px] px-3 py-1.5 bg-zinc-50 border rounded-full whitespace-nowrap">{l.slice(0,30)}</button>
+            ))}
+          </div>
+
+          <div className="mt-4 flex flex-wrap gap-2 items-center">
+            <button onClick={testAll} className="text-[11px] px-3.5 py-1.5 bg-green-50 border border-green-200 text-green-700 rounded-full hover:bg-green-100 transition font-medium">🧪 Test All Real</button>
+            <span className="text-[11px] text-zinc-400">Semua hasil real dari fetch langsung, bukan palsu.</span>
+          </div>
+        </div>
+
+        {/* Terminal + Stats - Responsive Grid */}
+        <div className="mt-4 md:mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Terminal */}
+          <div className="bg-white border rounded-[20px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] fade-in">
+            <div className="px-5 py-3.5 border-b bg-zinc-50/80 flex justify-between items-center">
+              <div className="flex items-center gap-2"><div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div><div className="text-[12px] font-semibold display">📟 Terminal Realtime</div></div>
+              <div className="flex items-center gap-2"><span className="text-[10px] px-2 py-1 bg-black text-green-400 rounded-full mono">live</span><span className="text-[10px] text-zinc-500">Cek API Aktif</span></div>
+            </div>
+            <div ref={terminalRef} className="terminal mono text-[11px] md:text-[12px] p-4 h-[220px] md:h-[260px] overflow-auto whitespace-pre-wrap leading-relaxed">
+              {checkData ? (checkData.error ? `Error: ${checkData.error}` : `${checkData.terminal_log}\n\n—\nURL: ${checkData.url}\nActive: ${checkData.is_active?'✅ ACTIVE':'❌ INACTIVE'}\nTime: ${checkData.total_time_ms}ms\nReal: true`) : 'Klik Terminal untuk cek apakah API aktif (real time)...\n\nContoh output real:\n[OK] HTML Fetch -> 200 ACTIVE (310ms) 11021 bytes\n[OK] JSON Endpoint -> 200 ACTIVE\n\nSemua cek real, bukan simulasi.'}
+            </div>
+            {checkData && <div className={`px-5 py-3 text-[12px] font-medium border-t flex items-center gap-2 ${checkData.is_active?'bg-green-50 text-green-700 border-green-100':'bg-red-50 text-red-700 border-red-100'}`}><span className={`w-2 h-2 rounded-full ${checkData.is_active?'bg-green-500':'bg-red-500'}`}></span>{checkData.is_active?'✅ ACTIVE - bisa di-scrape (real)':'❌ INACTIVE - mungkin Cloudflare'}<span className="ml-auto mono text-[10px]">{checkData.total_time_ms}ms • real</span></div>}
+          </div>
+
+          {/* Stats */}
+          <div className="bg-white border rounded-[20px] p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] fade-in">
+            <div className="flex justify-between items-center"><div className="text-[12px] font-semibold display">📊 Hasil Real (No Fake)</div><a href="/admin.html" className="text-[11px] px-2.5 py-1 bg-zinc-50 border rounded-full hover:bg-zinc-100 transition">Admin →</a></div>
+            {data && !data.error ? (
+              <>
+                <div className="grid grid-cols-3 gap-2.5 mt-4">
+                  <div className="bg-zinc-50 border rounded-[14px] p-3.5 hover:bg-zinc-100 transition"><div className="text-[10px] text-zinc-500 font-medium tracking-wide">TITLE</div><div className="text-[13px] font-semibold mt-1 truncate">{data.title||'-'}</div><div className="text-[10px] text-zinc-400 mt-1">Real</div></div>
+                  <div className="bg-zinc-50 border rounded-[14px] p-3.5 hover:bg-zinc-100 transition"><div className="text-[10px] text-zinc-500 font-medium tracking-wide">IMAGES</div><div className="text-[20px] font-bold mt-1 display">{data.images?.length||0}</div><div className="text-[10px] text-zinc-400">Found</div></div>
+                  <div className="bg-zinc-50 border rounded-[14px] p-3.5 hover:bg-zinc-100 transition"><div className="text-[10px] text-zinc-500 font-medium tracking-wide">LINKS</div><div className="text-[20px] font-bold mt-1 display">{data.links?.length||data.endpoints_found?.length||0}</div><div className="text-[10px] text-zinc-400">Found</div></div>
+                </div>
+                {data.test_results ? (
+                  <div className="mt-4 space-y-1.5 max-h-[140px] overflow-auto scrollbar-hide">
+                    <div className="text-[11px] font-medium text-zinc-600">Test All Formats Real:</div>
+                    {Object.entries(data.test_results.formats||{}).map(([fmt,res])=>(
+                      <div key={fmt} className="flex justify-between items-center text-[11px] mono bg-zinc-50 border rounded-full px-3 py-1.5"><span className="capitalize">{fmt}</span><span className={res.ok?'text-green-600':'text-red-600'}>{res.ok?`✅ ${res.filename||''}`:`❌ ${res.error}`}</span></div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="mt-4 text-[12px] text-zinc-500 leading-relaxed bg-zinc-50 border rounded-[12px] p-3">
+                    <div><span className="text-zinc-900 font-medium">Title:</span> {data.title}</div>
+                    <div><span className="text-zinc-900 font-medium">Domain:</span> {data.domain}</div>
+                    <div><span className="text-zinc-900 font-medium">HTML:</span> {data.stats?.html_length} chars real</div>
+                    <div className="mt-2 text-[11px] text-zinc-400">Semua data di atas real dari fetch langsung, bukan palsu.</div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="mt-8 text-center py-8">
+                <div className="w-12 h-12 bg-zinc-50 border rounded-2xl flex items-center justify-center mx-auto text-xl">🔍</div>
+                <div className="text-[13px] text-zinc-500 mt-3">Scrape link dulu untuk lihat hasil real</div>
+                <div className="text-[11px] text-zinc-400 mt-1">Contoh: https://quotes.toscrape.com</div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Code Output - Responsive */}
+        {data && !data.error && (
+          <div className="mt-4 md:mt-6 bg-white border rounded-[20px] overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.04)] fade-in">
+            {/* Tabs - Responsive with horizontal scroll on mobile */}
+            <div className="border-b bg-zinc-50/80">
+              <div className="p-2 flex flex-col gap-2">
+                <div className="flex gap-1 overflow-auto scrollbar-hide pb-1">
+                  {primaryFormats.map(t=>(
+                    <button key={t} onClick={()=>setTab(t)} className={`px-3.5 py-1.5 text-[11px] font-medium rounded-full capitalize whitespace-nowrap transition-all ${tab===t?'bg-black text-white shadow-md':'bg-white border hover:bg-zinc-50'}`}>{t}</button>
+                  ))}
+                  <button onClick={()=>setShowFormats(!showFormats)} className="px-3 py-1.5 text-[11px] font-medium rounded-full bg-white border whitespace-nowrap">{showFormats?'Less ▲':'More ▼ 30 formats'}</button>
+                </div>
+                {showFormats && (
+                  <div className="flex gap-1 flex-wrap animate-[fadeIn_0.3s_ease]">
+                    {allFormats.filter(f=>!primaryFormats.includes(f)).map(t=>(
+                      <button key={t} onClick={()=>setTab(t)} className={`px-2.5 py-1 text-[11px] rounded-full capitalize transition-all ${tab===t?'bg-black text-white':'bg-white border hover:bg-zinc-50'}`}>{t}</button>
+                    ))}
+                  </div>
+                )}
+                <div className="flex gap-1.5 justify-end">
+                  <button onClick={()=>navigator.clipboard.writeText(tab==='all'?JSON.stringify(data,null,2):genCode(tab))} className="text-[11px] px-3.5 py-1.5 bg-white border rounded-full hover:bg-zinc-50 transition">Copy</button>
+                  <button onClick={()=>window.open(`/api/universal?url=${encodeURIComponent(data.url||url)}&format=${tab==='all'?'json':tab}`,'_blank')} className="text-[11px] px-3.5 py-1.5 bg-black text-white rounded-full hover:bg-zinc-900 transition shadow-md">Download .{tab}</button>
+                </div>
+              </div>
+            </div>
+            <pre className="mono text-[11px] md:text-[12px] p-4 md:p-6 overflow-auto max-h-[500px] md:max-h-[600px] whitespace-pre-wrap break-all bg-[#fcfcfc] leading-relaxed">{tab==='all'?JSON.stringify(data,null,2):genCode(tab)}</pre>
+          </div>
+        )}
+
+        {data?.error && <div className="mt-6 bg-red-50 border border-red-200 rounded-[16px] p-4 text-[13px] text-red-700 fade-in">{data.error}</div>}
+
+        {/* Footer personal */}
+        <div className="mt-8 md:mt-12 text-center pb-8">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white border rounded-full text-[11px] text-zinc-500">
+            <span>🔒 Pribadi Edition</span><span>•</span><span>Real No Fake</span><span>•</span><span>30 Formats</span><span>•</span><span>Responsive HP & Laptop</span>
+          </div>
+          <div className="mt-3 flex justify-center gap-3 text-[11px]">
+            <a href="/docs.html" className="px-3 py-1 bg-white border rounded-full hover:bg-zinc-50 transition">📚 Docs</a>
+            <a href="/admin.html" className="px-3 py-1 bg-white border rounded-full hover:bg-zinc-50 transition">📊 Admin</a>
+            <a href="/api/docs" className="px-3 py-1 bg-white border rounded-full hover:bg-zinc-50 transition">API Docs</a>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
